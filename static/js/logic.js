@@ -1,5 +1,5 @@
 // Some supplementary data to populate customization fields and handle differences
-// between screen names (ex: Jeopardy Round) and underlying data (ex: category[round] of 1)
+// between screen names (ex: Jeopardy Round) and underlying data (ex: category[round] of 1).
 const labels={"category":{"Business":["Brands","Companies"],"Culture":["Art","Awards","Dance","Events","Fashion","Food & Drink","Museums","Theatre"],"Entertainment":["Games","Internet","Magazines & Newspapers","Movies & Film","Television","The Oscars"],"Geography":["Bodies of Water","Cities","Countries","Islands","Mountains","States"],"History":["Chronology","Famous Women","Monarchies","Ships & Sailors","War"],"Language":["Languages","Letters & Letter Play","Literature","Phrases","Shakespeare","Words & Word Play"],"Music":["Classical Music","Contemporary Music"],"Nature":["Birds","Parks","Pets","Plants","Trees","Zoology"],"Politics":["Government","Law","Presidents","World Leaders"],"Religion":["God & Gods","The Church"],"Science":["Anatomy","Chemistry","Engineering","Health","Measurements","Outer Space","Teeth & Dentistry"],"Sports":["Competition","Teams"],"Other":["Colleges & Universities","Colors","Flags","Hotels","Money","Numbers & Number Play","Stamps"]},"round":{"Jeopardy Round":[200,400,600,800,1000],"Double Jeopardy Round":[400,800,1200,1600,2000],"Final Jeopardy Round":["Final Jeopardy","Tiebreaker"]},"type":{"Regular":["Regular"],"Celebrity":["Celebrity Jeopardy!","Million Dollar Celebrity Invitational","Power Players Week"],"Champions":["All-Star Games","Battle of the Decades","Jeopardy! Greatest of All Time","Million Dollar Masters","The IBM Challenge","Tournament of Champions","Ultimate Tournament of Champions"],"College":["College Championship","Kids Week Reunion"],"Kids":["Back to School Week","Holiday Kids Week","Kids Week"],"Teen":["Teen Tournament","Teen Tournament Summer Games"],"Other":["International Championship","Teachers Tournament"]}}
 const roundConversion={"1":"Jeopardy Round","2":"Double Jeopardy Round","3":"Final Jeopardy Round"}
 const valueConversion={"0":"Final Jeopardy","-1":"Tiebreaker"}
@@ -242,7 +242,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
     $("input[type=radio][name=questionSet]").change(function(){
         if (this.value != "1"){
             if (alertWarning != true){
-                $(".modal-body").prepend('<div class="alert alert-warning alert-dismissible">\
+                $("#customizeModal").find(".modal-body").prepend('<div class="alert alert-warning alert-dismissible">\
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
                 <strong>Warning:</strong> Clue sets 2 and 3 have less reliable categorization and will require new files to be loaded.\
                 </div>')
@@ -328,7 +328,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
         if (clueDataFilteredFinal.length == 0){
             $("#customizeModalLabel").text(`Customization Settings: 0 clues selected`)
             if (alertError != true){
-                $(".modal-body").prepend('<div class="alert alert-danger alert-dismissible">\
+                $("#customizeModal").find(".modal-body").prepend('<div class="alert alert-danger alert-dismissible">\
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
                 <strong>Error:</strong> Filtering returns no clues.\
                 </div>')
