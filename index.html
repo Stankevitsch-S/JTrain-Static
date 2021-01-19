@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">    
+    <link rel="stylesheet" href="static/css/style.css">    
+    <title>J! Train</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark">
+      <span class="navbar-brand mb-0 h5">J! Train</span>
+      <div class="ml-auto">
+        <a class="navbar-brand" href="#" data-toggle="modal" data-target="#customizeModal">Customize</a>
+        <a class="navbar-brand" href="#" data-toggle="modal" data-target="#aboutModal">About</a>
+      </div>
+    </nav>
+      <div class="modal fade" id="customizeModal" tabindex="-1" role="dialog" aria-labelledby="customizeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="customizeModalLabel">Customization Settings</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="accordion" id="customizeOptions">
+                  <div class="card">
+                      <button class="btn btn-secondary btn-lg btn-block" type="button" id="customizeCategory" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        Filter by Category / Subcategory
+                      </button>
+                      <div id="collapseOne" class="collapse" aria-labelledby="customizeCategory" data-parent="#customizeOptions">
+                        <div class="card-body">
+                        </div>
+                      </div>
+                  </div>
+                  <div class="card">
+                    <button class="btn btn-secondary btn-lg btn-block" type="button" id="customizeRound" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                      Filter by Round / Value
+                    </button>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="customizeRound" data-parent="#customizeOptions">
+                      <div class="card-body">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <button class="btn btn-secondary btn-lg btn-block" type="button" id="customizeShow" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                      Filter by Show Type
+                    </button>
+                    <div id="collapseThree" class="collapse" aria-labelledby="customizeShow" data-parent="#customizeOptions">
+                      <div class="card-body">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <button class="btn btn-secondary btn-lg btn-block" type="button" id="customizeAdvanced" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                      Advanced Settings
+                    </button>
+                    <div id="collapseFour" class="collapse" aria-labelledby="customizeAdvanced" data-parent="#customizeOptions">
+                      <div class="card-body">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <input class="btn btn-secondary" type="submit" id="customizeSave" value="Save changes">
+              <button type="button" class="btn btn-secondary" id="customizeReset">Reset settings</button>
+            </div>
+          </div>
+        </div>  
+      </div>
+      <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="aboutModalLabel">About</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <h5>Summary</h5>
+              J! Train is a web application that looks to improve skills in both recall and critical thinking. All Jeopardy! clues in shows since 2000 have been categorized and hints are available in the form of near-miss answers.
+              <h5 class="my-2">Usage Tips</h5>
+              <ul>
+                <li>Avoid simultaneous filters on all three criteria (category, round, and show type) as there may not be any resutls.</li>
+                <li>Hints can be turned off by setting hints to 1 in Advanced Settings.</li>
+                <li>Increasing the clue set results in a threefold increase in clue count but is only recommended without category filters.</li>
+                <li>For clues that change with time (e.g. current president of country X), you can see the show's airdate by clicking "More Info".</li>
+              </ul>
+              <h5 class="my-2">Contact</h5>
+              Contributor: Shawn Stankevitsch <br>
+              Source on <a href="#">Github</a> <br>
+              Comments? Questions? <a href="mailto:sstankevitsch@gmail.com">Send an email</a>
+            </div>
+            <div class="modal-footer">
+              <small class="mr-auto">
+              The Jeopardy! name and all elements are property of Jeopardy Productions, Inc. 
+              <br>
+              J! Train is not affiliated with Jeopardy Productions, Inc.
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row no-gutters">
+        <div class="col-md-3 col-xs-12">
+        </div>
+        <div class="col-md-6 col-xs-12">
+          <div class="m-2">
+            <div class="card text-center">
+              <h5 class="card-header" id="assignedCat">
+              </h5>
+              <div class="card-body">
+                <h3 id="category"></h3><br>
+                <h5 id="clue"></h5><br>
+                <div id="buttons">
+                </div><br>
+                <div id="buttonResponse">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-xs-12">
+        </div>
+      </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="static/js/jquery-csv.js"></script>
+    <script src="static/js/logic.js"></script>
+  </body>
+</html>
