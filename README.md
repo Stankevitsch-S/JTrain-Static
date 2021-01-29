@@ -14,21 +14,31 @@ To filter for specific categories, values, and/or show types, click on customize
 
 **root**<br>
 index.html: Landing page, mainly contains text and bootstrap components to be populated with JavaScript.<br>
+
 **Data**<br>
 clueN.csv: Contains clue text, value, answer, 10 near-miss answers, and foreign keys of corresponding categories and shows.<br>
 categoryN.csv: Contains category name, round, comments, and assigned cluster category/subcategory.<br>
 metadata.csv: Contains show airdate and type.<br>
 *Note:* N = 1-3 represents the clue set, a method to separate categories/clues by proximity to the calculated cluster centers. Higher clue sets contain all clues in lower sets but may result in mis-assigned cluster categories.<br>
+
+**Data Preparation**<br>
+parsing.ipynb: Jupyter notebook to parse downloaded J! Archive pages and extract clues, categories, and metadata.<br>
+clustering.ipynb: Jupyter notebook to cluster categories.<br>
+answers.ipynb: Jupyter notebook to determine near-miss answers to clues.<br>
+normalization.ipynb: Preparing data for the web application by normalizing csvs created in previous steps.<br>
+*Note:* For an in-depth description, see the Technical details header and the comments in the files themselves.<br>
+
 **static/css**<br>
 style.css: User css sheet with small fixes for alignment/clarity.<br>
 bootstrap.min.css: Modified bootstrap css for dark theme.<br>
+
 **static/js**<br>
-logic.js: User JavaScript functions to load data, populate clue delivery system, and enable customization/filtering of clues.
-jquery-csv.js: Jquery plugin to allow conversion of raw csv to a JavaScript object.
+logic.js: User JavaScript functions to load data, populate clue delivery system, and enable customization/filtering of clues.<br>
+jquery-csv.js: Jquery plugin to allow conversion of raw csv to a JavaScript object.<br>
 
 ## Technical details
 
-All data cleaning procedures and machine learning models detailed below were done in Python. Code is available on request.
+All data cleaning procedures and machine learning models detailed below were done in Python.
 
 All webpages for shows after 2000 were downloaded from J! Archive, and clue, category and show data were parsed using Beautiful Soup. Clue values were taken based on position on the board (ignoring daily doubles). Clues with links to images/video/sound were ignored.
 
