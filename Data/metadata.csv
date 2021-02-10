@@ -1,4 +1,4 @@
-﻿showID,filename,airdate,type,subType
+﻿showID,filename,airdate,showType,showSubType
 0,1.html,2004-09-06,Regular,Regular
 1,10.html,2004-09-17,Regular,Regular
 2,100.html,2005-01-06,Regular,Regular

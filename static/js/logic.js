@@ -1,9 +1,11 @@
 // Some supplementary data to populate customization fields and handle differences
 // between screen names (ex: Jeopardy Round) and underlying data (ex: category[round] of 1).
-const labels={"category":{"Business":["Brands","Companies"],"Culture":["Art","Awards","Dance","Events","Fashion","Food & Drink","Museums","Theatre"],"Entertainment":["Games","Internet","Magazines & Newspapers","Movies & Film","Television","The Oscars"],"Geography":["Bodies of Water","Cities","Countries","Islands","Mountains","States"],"History":["Chronology","Famous Women","Monarchies","Ships & Sailors","War"],"Language":["Languages","Letters & Letter Play","Literature","Phrases","Shakespeare","Words & Word Play"],"Music":["Classical Music","Contemporary Music"],"Nature":["Birds","Parks","Pets","Plants","Trees","Zoology"],"Politics":["Government","Law","Presidents","World Leaders"],"Religion":["God & Gods","The Church"],"Science":["Anatomy","Chemistry","Engineering","Health","Measurements","Outer Space","Teeth & Dentistry"],"Sports":["Competition","Teams"],"Other":["Colleges & Universities","Colors","Flags","Hotels","Money","Numbers & Number Play","Stamps"]},"round":{"Jeopardy Round":[200,400,600,800,1000],"Double Jeopardy Round":[400,800,1200,1600,2000],"Final Jeopardy Round":["Final Jeopardy","Tiebreaker"]},"type":{"Regular":["Regular"],"Celebrity":["Celebrity Jeopardy!","Million Dollar Celebrity Invitational","Power Players Week"],"Champions":["All-Star Games","Battle of the Decades","Jeopardy! Greatest of All Time","Million Dollar Masters","The IBM Challenge","Tournament of Champions","Ultimate Tournament of Champions"],"College":["College Championship","Kids Week Reunion"],"Kids":["Back to School Week","Holiday Kids Week","Kids Week"],"Teen":["Teen Tournament","Teen Tournament Summer Games"],"Other":["International Championship","Teachers Tournament"]}}
-const roundConversion={"1":"Jeopardy Round","2":"Double Jeopardy Round","3":"Final Jeopardy Round"}
-const valueConversion={"0":"Final Jeopardy","-1":"Tiebreaker"}
-const defaultSettings={"hintCount":"5","questionSet":"1"}
+const labels={"category":{"Business":["Brands","Companies"],"Culture":["Art","Awards","Dance","Events","Fashion","Food & Drink","Museums","Theatre"],"Entertainment":["Games","Internet","Magazines & Newspapers","Movies & Film","Television","The Oscars"],"Geography":["Bodies of Water","Cities","Countries","Islands","Mountains","States"],"History":["Chronology","Famous Women","Monarchies","Ships & Sailors","War"],"Language":["Languages","Letters & Letter Play","Literature","Phrases","Shakespeare","Words & Word Play"],"Music":["Classical Music","Contemporary Music"],"Nature":["Birds","Parks","Pets","Plants","Trees","Zoology"],"Politics":["Government","Law","Presidents","World Leaders"],"Religion":["God & Gods","The Church"],"Science":["Anatomy","Chemistry","Engineering","Health","Measurements","Outer Space","Teeth & Dentistry"],"Sports":["Competition","Teams"],"Other":["Colleges & Universities","Colors","Flags","Hotels","Money","Numbers & Number Play","Stamps"]},"round":{"Jeopardy Round":["200","400","600","800","1000"],"Double Jeopardy Round":["400","800","1200","1600","2000"],"Final Jeopardy Round":["Final Jeopardy","Tiebreaker"]},"showType":{"Regular":["Regular"],"Celebrity":["Celebrity Jeopardy!","Million Dollar Celebrity Invitational","Power Players Week"],"Champions":["All-Star Games","Battle of the Decades","Jeopardy! Greatest of All Time","Million Dollar Masters","The IBM Challenge","Tournament of Champions","Ultimate Tournament of Champions"],"College":["College Championship","Kids Week Reunion"],"Kids":["Back to School Week","Holiday Kids Week","Kids Week"],"Teen":["Teen Tournament","Teen Tournament Summer Games"],"Other":["International Championship","Teachers Tournament"]}}
+const roundConversion={"Jeopardy Round":1,"Double Jeopardy Round":2,"Final Jeopardy Round":3}
+const valueConversion={"Final Jeopardy":0,"Tiebreaker":-1,"200":200,"400":400,"600":600,"800":800,"1000":1000,"1200":1200,"1600":1600,"2000":2000}
+const reverseRoundConversion={"1":"Jeopardy Round","2":"Double Jeopardy Round","3":"Final Jeopardy Round"}
+const reverseValueConversion={"0":"Final Jeopardy","-1":"Tiebreaker"}
+const defaultSettings={"hintCount":"5","clueSet":"1"}
 
 // Booleans to check whether alerts are visible, initialized as indeterminate
 // such that (alert != true) evaluates correctly on first run.
@@ -11,10 +13,10 @@ var alertWarning
 var alertError
 
 // Fetch data as csv and parse as object.
-function getData(type){
+function getData(clueSet){
     return new Promise(function(resolve, reject){
         $.ajax({
-            url: `Data/${type}.csv`, 
+            url: `Data/${clueSet}.csv`, 
             type: "GET",
             success: function(csvData){
                 var data = $.csv.toObjects(csvData)
@@ -33,11 +35,11 @@ function generateClue(clueData){
     return clueData[keys[keys.length * Math.random() << 0]]
 }
 
-// Builds UI with a specified question set (called on start with question set 1, 
-// only called again if question set is changedas it requires new data to be loaded).
+// Builds UI with a specified clue set (called on start with clue set 1, 
+// only called again if clue set is changedas it requires new data to be loaded).
 function initApp(settings){
     // Before you build the UI, make sure each csv is finished being parsed as object.
-    Promise.all([getData(`clue${settings["questionSet"]}`),getData(`category${settings["questionSet"]}`),getData("metadata")])
+    Promise.all([getData(`clue${settings["clueSet"]}`),getData(`category${settings["clueSet"]}`),getData("metadata")])
         .then(function(data){
             var clueData = data[0]
             var categoryData = data[1]
@@ -96,16 +98,16 @@ function buildClues(clueData,categoryData,metadataData,settings){
     })
     $("#moreInfo").click(function(){
         // Convert numeric codes Final Jeopardy clues, Tiebreakers, and Rounds.
-        if (clue["value"] == "0" || clue["value"] == "-1"){
-            $("#buttonResponse").html(`Value: ${valueConversion[clue["value"]]}<br>\
-            Round: ${roundConversion[category["round"]]}<br>\
+        if (clue["clueValue"] == "0" || clue["clueValue"] == "-1"){
+            $("#buttonResponse").html(`Value: ${reverseValueConversion[clue["clueValue"]]}<br>\
+            Round: ${reverseRoundConversion[category["round"]]}<br>\
             Airdate: ${metadata["airdate"]}<br>
-            Show Type: ${metadata["subType"]}`)
+            Show Type: ${metadata["showSubType"]}`)
         } else {
-            $("#buttonResponse").html(`Value: ${clue["value"]}<br>\
-            Round: ${roundConversion[category["round"]]}<br>\
+            $("#buttonResponse").html(`Value: ${clue["clueValue"]}<br>\
+            Round: ${reverseRoundConversion[category["round"]]}<br>\
             Airdate: ${metadata["airdate"]}<br>
-            Show Type: ${metadata["subType"]}`)
+            Show Type: ${metadata["showSubType"]}`)
         }
         if (!(category["categoryComment"].length === 0)){
             $("#buttonResponse").prepend(`Category Comment: ${category["categoryComment"]}<br>`)
@@ -155,7 +157,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
     }
     // Populate show type filters.
     $("#collapseThree").find(".card-body").html("")
-    for (let [key,values] of Object.entries(labels["type"])){
+    for (let [key,values] of Object.entries(labels["showType"])){
         $("#collapseThree").find(".card-body").append(`<div class="btn-group-toggle text-left h5 my-2" id="${key}" data-toggle="buttons">\
         <label class="mb-0 align-top filterLabel">${key}</label>\
         <label class="btn btn-secondary active all"><input type="radio" checked><h5 class=mb-0>All</h5></label>\
@@ -174,11 +176,11 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
         <div class="col-md-2 col-xs-3"><label for="hintCount"><h5 class=mb-0>Hints</h5></label></div>\
         <div class="col-md-9 col-xs-8"><input type="range" class="custom-range" name="hintCount" min="1" max="11" id="hintCount" value="${settings["hintCount"]}" oninput="hints.value=hintCount.value"></div>\
         <div class="col-md-1 col-xs-1"><h5 class=mb-0><output id="hints" name="hints" for="hintCount">${settings["hintCount"]}</output></h5></div></div>\
-        <div class="btn-group-toggle text-left h5 my-2" id="questionSet" data-toggle="buttons">\
+        <div class="btn-group-toggle text-left h5 my-2" id="clueSet" data-toggle="buttons">\
         <label class="mb-0 align-top filterLabel">Clue Set</label>\
-        <label class="btn btn-secondary"><input type="radio" name="questionSet" value="1"><h5 class=mb-0>1</h5></label>\
-        <label class="btn btn-secondary"><input type="radio" name="questionSet" value="2"><h5 class=mb-0>2</h5></label>\
-        <label class="btn btn-secondary"><input type="radio" name="questionSet" value="3"><h5 class=mb-0>3</h5></label></div>`)
+        <label class="btn btn-secondary"><input type="radio" name="clueSet" value="1"><h5 class=mb-0>1</h5></label>\
+        <label class="btn btn-secondary"><input type="radio" name="clueSet" value="2"><h5 class=mb-0>2</h5></label>\
+        <label class="btn btn-secondary"><input type="radio" name="clueSet" value="3"><h5 class=mb-0>3</h5></label></div>`)
     // Converting the enter key on buttons and checkboxes to clicks to allow keyboard usage
     $(".btn").keypress(function(e){
         if (e.which === 13){
@@ -238,8 +240,8 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
         })
     }
     // Activate clue set button manually, as there is a handler below to display a warning on change.
-    $("#questionSet").find(`input[value="${settings["questionSet"]}"]`).click()
-    $("input[type=radio][name=questionSet]").change(function(){
+    $("#clueSet").find(`input[value="${settings["clueSet"]}"]`).click()
+    $("input[type=radio][name=clueSet]").change(function(){
         if (this.value != "1"){
             if (alertWarning != true){
                 $("#customizeModal").find(".modal-body").prepend('<div class="alert alert-warning alert-dismissible">\
@@ -266,40 +268,24 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
             return Object.keys(labels["round"]).includes(row["name"])
         })
         var showTypeFilter = formData.filter(function(row){
-            return Object.keys(labels["type"]).includes(row["name"])
+            return Object.keys(labels["showType"]).includes(row["name"])
         })
-        // Filter categories by matching category and subcategory.
-        var categoryDataFiltered1 = categoryData.filter(function(category){
+        // Filter categories by matching subcategory.
+        var categoryDataFiltered = categoryData.filter(function(category){
             for (let i = 0; i < categoryAssignedFilter.length; i++){
                 let row = categoryAssignedFilter[i]
-                if (category["categoryAssigned"] === row["name"] && category["subcategoryAssigned"] === row["value"]){
+                if (category["subcategoryAssigned"] === row["value"]){
                     return true
                 }
             }
             return false
         })
-        // Filter categories by matching round.
-        var categoryDataFiltered2 = categoryDataFiltered1.filter(function(category){
-            for (let i = 0; i < roundValueFilter.length; i++){
-                let row = roundValueFilter[i]
-                if (roundConversion[category["round"]] === row["name"]){
-                    return true
-                }
-            }
-            return false
-        })
-        // Filter clues by matching value.
+        // Filter clues by matching new value (will also address round filtering).
         var clueDataFiltered1 = clueData.filter(function(clue){
             for (let i = 0; i < roundValueFilter.length; i++){
                 let row = roundValueFilter[i]
-                if (row["value"] == "Final Jeopardy" || row["value"] == "Tiebreaker"){
-                    if (valueConversion[clue["value"]] === row["value"]){
-                        return true
-                    }
-                } else {
-                    if (clue["value"] === row["value"]){
-                        return true
-                    }
+                if (clue["newClueValue"] === (roundConversion[row["name"]]+valueConversion[row["value"]]).toString()){
+                    return true
                 }
             }
             return false
@@ -308,7 +294,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
         var metadataDataFiltered = metadataData.filter(function(show){
             for (let i = 0; i < showTypeFilter.length; i++){
                 let row = showTypeFilter[i]
-                if (show["type"] === row["name"] && show["subType"] === row["value"]){
+                if (show["showSubType"] === row["value"]){
                     return true
                 }
             }
@@ -320,7 +306,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
         var clueDataFiltered2 = clueDataFiltered1.filter(function(clue){
             return showIDs.has(clue["showID"]) 
         })
-        var categoryIDs = new Set(categoryDataFiltered2.map(row => row["categoryID"]))
+        var categoryIDs = new Set(categoryDataFiltered.map(row => row["categoryID"]))
         var clueDataFilteredFinal = clueDataFiltered2.filter(function(clue){
             return categoryIDs.has(clue["categoryID"])
         })
@@ -338,16 +324,16 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
                 }) 
             }
         // Call initApp, loading new data if the clue set is changed.
-        } else if (formData.find(element => element["name"] == "questionSet")["value"] != settings["questionSet"]){
+        } else if (formData.find(element => element["name"] == "clueSet")["value"] != settings["clueSet"]){
             var newSettings = {}
             newSettings["hintCount"] = formData.find(element => element["name"] == "hintCount")["value"]
-            newSettings["questionSet"] = formData.find(element => element["name"] == "questionSet")["value"]
+            newSettings["clueSet"] = formData.find(element => element["name"] == "clueSet")["value"]
             initApp(newSettings)
         // Call buildClues with new hint count if hint count is changed.
         } else if (formData.find(element => element["name"] == "hintCount")["value"] != settings["hintCount"]){
             var newSettings = {}
             newSettings["hintCount"] = formData.find(element => element["name"] == "hintCount")["value"]
-            newSettings["questionSet"] = settings["questionSet"]
+            newSettings["clueSet"] = settings["clueSet"]
             buildClues(clueDataFilteredFinal,categoryData,metadataData,newSettings)
         // Otherwise, call buildClues with the newly filtered clue data.
         } else {
@@ -357,7 +343,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
     // On reset, only customization settings need to be changed if clue set is 1.
     // If it isn't, clue set 1 needs to be reloaded and thus initApp needs to be called.
     $("#customizeReset").off().click(function(){
-        if (settings["questionSet"] != "1"){    
+        if (settings["clueSet"] != "1"){    
             initApp(defaultSettings)
         } else {
             buildCustomization(clueData,categoryData,metadataData,defaultSettings)
