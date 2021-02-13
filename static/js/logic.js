@@ -12,6 +12,9 @@ const defaultSettings={"hintCount":"5","clueSet":"1"}
 var alertWarning
 var alertError
 
+// Boolean to ensure filters are only reset when "Reset settings" is clicked.
+var initFilters = true
+
 // Fetch data as csv and parse as object.
 function getData(clueSet){
     return new Promise(function(resolve, reject){
@@ -44,8 +47,16 @@ function initApp(settings){
             var clueData = data[0]
             var categoryData = data[1]
             var metadataData = data[2]
-            buildClues(clueData,categoryData,metadataData,settings)
-            buildCustomization(clueData,categoryData,metadataData,settings)
+            // Small optimization, we don't need to call filterClues() if we know we have default data.
+            if (initFilters){
+                buildClues(clueData,categoryData,metadataData,settings)
+                buildCustomization(clueData,categoryData,metadataData,settings)
+            } else {
+                var formData = $("form").serializeArray()
+                clueDataFilteredFinal = filterClues(clueData,categoryData,metadataData,formData) 
+                buildClues(clueDataFilteredFinal,categoryData,metadataData,settings)
+                buildCustomization(clueData,categoryData,metadataData,settings)
+            }
         })
         .catch(function(errors){
             console.log(errors)
@@ -123,121 +134,122 @@ function buildClues(clueData,categoryData,metadataData,settings){
 
 // Build the customization modal with all possible filters, dictated by the supplementary objects at the top.
 function buildCustomization(clueData,categoryData,metadataData,settings){
-    // Since this function is never called with filtered clueData passed in, no length == 1 handler is needed.
-    $("#customizeModalLabel").text(`Customization Settings: ${Object.keys(clueData).length} clues selected`)
-    // Populate category/subcategory filters.
-    $("#collapseOne").find(".card-body").html("")
-    for (let [key,values] of Object.entries(labels["category"])){
-        $("#collapseOne").find(".card-body").append(`<div class="btn-group-toggle text-left h5 my-2" id="${key}" data-toggle="buttons">\
-        <label class="mb-0 align-top filterLabel">${key}</label>\
-        <label class="btn btn-secondary active all"><input type="radio" checked><h5 class=mb-0>All</h5></label>\
-        <label class="btn btn-secondary none"><input type="radio"><h5 class=mb-0>None</h5></label>\
-        <label class="btn btn-secondary dropdown-toggle choose"><input type="checkbox"></label>\
-        </div>`)
-        values.forEach(function(value){
-            $("#collapseOne").find(".card-body").append(`<div class="custom-control custom-checkbox text-left d-none">\
-            <input type="checkbox" class="custom-control-input" name="${key}" value="${value}" id="${key}${value}" checked="">\
-            <label class="custom-control-label" for="${key}${value}">${value}</label></div>`)
-        })
-    }
-    // Populate round/value filters.
-    $("#collapseTwo").find(".card-body").html("")
-    for (let [key,values] of Object.entries(labels["round"])){
-        $("#collapseTwo").find(".card-body").append(`<div class="btn-group-toggle text-left h5 my-2" id="${key}" data-toggle="buttons">\
-        <label class="mb-0 align-top filterLabel">${key}</label>\
-        <label class="btn btn-secondary active all"><input type="radio" checked><h5 class=mb-0>All</h5></label>\
-        <label class="btn btn-secondary none"><input type="radio"><h5 class=mb-0>None</h5></label>\
-        <label class="btn btn-secondary dropdown-toggle choose"><input type="checkbox"></label>\
-        </div>`)
-        values.forEach(function(value){
-            $("#collapseTwo").find(".card-body").append(`<div class="custom-control custom-checkbox text-left d-none">\
-            <input type="checkbox" class="custom-control-input" name="${key}" value="${value}" id="${key}${value}" checked="">\
-            <label class="custom-control-label" for="${key}${value}">${value}</label></div>`)
-        })
-    }
-    // Populate show type filters.
-    $("#collapseThree").find(".card-body").html("")
-    for (let [key,values] of Object.entries(labels["showType"])){
-        $("#collapseThree").find(".card-body").append(`<div class="btn-group-toggle text-left h5 my-2" id="${key}" data-toggle="buttons">\
-        <label class="mb-0 align-top filterLabel">${key}</label>\
-        <label class="btn btn-secondary active all"><input type="radio" checked><h5 class=mb-0>All</h5></label>\
-        <label class="btn btn-secondary none"><input type="radio"><h5 class=mb-0>None</h5></label>\
-        <label class="btn btn-secondary dropdown-toggle choose"><input type="checkbox"></label>\
-        </div>`)
-        values.forEach(function(value){
-            $("#collapseThree").find(".card-body").append(`<div class="custom-control custom-checkbox text-left d-none">\
-            <input type="checkbox" class="custom-control-input" name="${key}" value="${value}" id="${key}${value}" checked="">\
-            <label class="custom-control-label" for="${key}${value}">${value}</label></div>`)
-        })
-    }
-    // Populate advanced settings.
-    $("#collapseFour").find(".card-body").html("")
-    $("#collapseFour").find(".card-body").append(`<div class="row">\
-        <div class="col-md-2 col-xs-3"><label for="hintCount"><h5 class=mb-0>Hints</h5></label></div>\
-        <div class="col-md-9 col-xs-8"><input type="range" class="custom-range" name="hintCount" min="1" max="11" id="hintCount" value="${settings["hintCount"]}" oninput="hints.value=hintCount.value"></div>\
-        <div class="col-md-1 col-xs-1"><h5 class=mb-0><output id="hints" name="hints" for="hintCount">${settings["hintCount"]}</output></h5></div></div>\
-        <div class="btn-group-toggle text-left h5 my-2" id="clueSet" data-toggle="buttons">\
-        <label class="mb-0 align-top filterLabel">Clue Set</label>\
-        <label class="btn btn-secondary"><input type="radio" name="clueSet" value="1"><h5 class=mb-0>1</h5></label>\
-        <label class="btn btn-secondary"><input type="radio" name="clueSet" value="2"><h5 class=mb-0>2</h5></label>\
-        <label class="btn btn-secondary"><input type="radio" name="clueSet" value="3"><h5 class=mb-0>3</h5></label></div>`)
-    // Converting the enter key on buttons and checkboxes to clicks to allow keyboard usage
-    $(".btn").keypress(function(e){
-        if (e.which === 13){
-            $(this).click()
+    if (initFilters){
+        initFilters = false
+        // Populate category/subcategory filters.
+        $("#collapseOne").find(".card-body").html("")
+        for (let [key,values] of Object.entries(labels["category"])){
+            $("#collapseOne").find(".card-body").append(`<div class="btn-group-toggle text-left h5 my-2" id="${key}" data-toggle="buttons">\
+            <label class="mb-0 align-top filterLabel">${key}</label>\
+            <label class="btn btn-secondary active all"><input type="radio" checked><h5 class=mb-0>All</h5></label>\
+            <label class="btn btn-secondary none"><input type="radio"><h5 class=mb-0>None</h5></label>\
+            <label class="btn btn-secondary dropdown-toggle choose"><input type="checkbox"></label>\
+            </div>`)
+            values.forEach(function(value){
+                $("#collapseOne").find(".card-body").append(`<div class="custom-control custom-checkbox text-left d-none">\
+                <input type="checkbox" class="custom-control-input" name="${key}" value="${value}" id="${key}${value}" checked="">\
+                <label class="custom-control-label" for="${key}${value}">${value}</label></div>`)
+            })
         }
-    })
-    $(".custom-control-input").keypress(function(e){
-        if (e.which === 13){
-            $(this).click()
+        // Populate round/value filters.
+        $("#collapseTwo").find(".card-body").html("")
+        for (let [key,values] of Object.entries(labels["round"])){
+            $("#collapseTwo").find(".card-body").append(`<div class="btn-group-toggle text-left h5 my-2" id="${key}" data-toggle="buttons">\
+            <label class="mb-0 align-top filterLabel">${key}</label>\
+            <label class="btn btn-secondary active all"><input type="radio" checked><h5 class=mb-0>All</h5></label>\
+            <label class="btn btn-secondary none"><input type="radio"><h5 class=mb-0>None</h5></label>\
+            <label class="btn btn-secondary dropdown-toggle choose"><input type="checkbox"></label>\
+            </div>`)
+            values.forEach(function(value){
+                $("#collapseTwo").find(".card-body").append(`<div class="custom-control custom-checkbox text-left d-none">\
+                <input type="checkbox" class="custom-control-input" name="${key}" value="${value}" id="${key}${value}" checked="">\
+                <label class="custom-control-label" for="${key}${value}">${value}</label></div>`)
+            })
         }
-    })
-    // Removing focus state from buttons, but only for mouse users.
-    $(".btn").mouseout(function(){
-        $(this).blur()
-    })
-    // There are no sub-filters for Regular show type, so remove the option.
-    $("#Regular").find(".dropdown-toggle").addClass("d-none")
-    // Show sub-filters on clicking dropdown button.
-    $(".choose").click(function(){
-        var id = $(this).parent().attr("id")
-        $(`input[name="${id}"]`).each(function(){
-            $(this).parent().toggleClass("d-none")
-        })
-    })
-    // Check all sub-filter checkboxes on clicking "All" button (the reverse is also handled down below).
-    $(".all").click(function(){
-        var id = $(this).parent().attr("id")
-        $(`input[name="${id}"]`).each(function(){
-            $(this).prop("checked",true)
-        })
-    })
-    // Uncheck all sub-filter checkboxes on clicking "None" button.
-    $(".none").click(function(){
-        var id = $(this).parent().attr("id")
-        $(`input[name="${id}"]`).each(function(){
-            $(this).prop("checked",false)
-        })
-    })
-    // Activate "All", "None", or neither filter button depending on whether all, none, or some sub-filter checkboxes are checked.
-    $(".custom-control-input").change(function(){
-        var id = $(this).attr("name")
-        if ($(`input[name="${id}"]:checked`).length == $(`input[name="${id}"]`).length){
-            $(`div[id="${id}"`).find(".all").addClass("active")
-            $(`div[id="${id}"`).find(".none").removeClass("active")
-        } else if ($(`input[name="${id}"]:checked`).length == 0){
-            $(`div[id="${id}"`).find(".all").removeClass("active")
-            $(`div[id="${id}"`).find(".none").addClass("active")            
-        } else {
-            $(`div[id="${id}"`).find(".all").removeClass("active")
-            $(`div[id="${id}"`).find(".none").removeClass("active")
+        // Populate show type filters.
+        $("#collapseThree").find(".card-body").html("")
+        for (let [key,values] of Object.entries(labels["showType"])){
+            $("#collapseThree").find(".card-body").append(`<div class="btn-group-toggle text-left h5 my-2" id="${key}" data-toggle="buttons">\
+            <label class="mb-0 align-top filterLabel">${key}</label>\
+            <label class="btn btn-secondary active all"><input type="radio" checked><h5 class=mb-0>All</h5></label>\
+            <label class="btn btn-secondary none"><input type="radio"><h5 class=mb-0>None</h5></label>\
+            <label class="btn btn-secondary dropdown-toggle choose"><input type="checkbox"></label>\
+            </div>`)
+            values.forEach(function(value){
+                $("#collapseThree").find(".card-body").append(`<div class="custom-control custom-checkbox text-left d-none">\
+                <input type="checkbox" class="custom-control-input" name="${key}" value="${value}" id="${key}${value}" checked="">\
+                <label class="custom-control-label" for="${key}${value}">${value}</label></div>`)
+            })
         }
-    })
-    // Clean up the customization modal on smaller screens.
-    if ($(window).width() < 400){
-        $(".filterLabel").each(function(){
-            $(this).after("<br>")
+        // Populate advanced settings.
+        $("#collapseFour").find(".card-body").html("")
+        $("#collapseFour").find(".card-body").append(`<div class="row">\
+            <div class="col-md-2 col-xs-3"><label for="hintCount"><h5 class=mb-0>Hints</h5></label></div>\
+            <div class="col-md-9 col-xs-8"><input type="range" class="custom-range" name="hintCount" min="1" max="11" id="hintCount" value="${settings["hintCount"]}" oninput="hints.value=hintCount.value"></div>\
+            <div class="col-md-1 col-xs-1"><h5 class=mb-0><output id="hints" name="hints" for="hintCount">${settings["hintCount"]}</output></h5></div></div>\
+            <div class="btn-group-toggle text-left h5 my-2" id="clueSet" data-toggle="buttons">\
+            <label class="mb-0 align-top filterLabel">Clue Set</label>\
+            <label class="btn btn-secondary"><input type="radio" name="clueSet" value="1"><h5 class=mb-0>1</h5></label>\
+            <label class="btn btn-secondary"><input type="radio" name="clueSet" value="2"><h5 class=mb-0>2</h5></label>\
+            <label class="btn btn-secondary"><input type="radio" name="clueSet" value="3"><h5 class=mb-0>3</h5></label></div>`)
+        // Converting the enter key on buttons and checkboxes to clicks to allow keyboard usage
+        $(".btn").keypress(function(e){
+            if (e.which === 13){
+                $(this).click()
+            }
         })
+        $(".custom-control-input").keypress(function(e){
+            if (e.which === 13){
+                $(this).click()
+            }
+        })
+        // Removing focus state from buttons, but only for mouse users.
+        $(".btn").mouseout(function(){
+            $(this).blur()
+        })
+        // There are no sub-filters for Regular show type, so remove the option.
+        $("#Regular").find(".dropdown-toggle").addClass("d-none")
+        // Show sub-filters on clicking dropdown button.
+        $(".choose").click(function(){
+            var id = $(this).parent().attr("id")
+            $(`input[name="${id}"]`).each(function(){
+                $(this).parent().toggleClass("d-none")
+            })
+        })
+        // Check all sub-filter checkboxes on clicking "All" button (the reverse is also handled down below).
+        $(".all").click(function(){
+            var id = $(this).parent().attr("id")
+            $(`input[name="${id}"]`).each(function(){
+                $(this).prop("checked",true)
+            })
+        })
+        // Uncheck all sub-filter checkboxes on clicking "None" button.
+        $(".none").click(function(){
+            var id = $(this).parent().attr("id")
+            $(`input[name="${id}"]`).each(function(){
+                $(this).prop("checked",false)
+            })
+        })
+        // Activate "All", "None", or neither filter button depending on whether all, none, or some sub-filter checkboxes are checked.
+        $(".custom-control-input").change(function(){
+            var id = $(this).attr("name")
+            if ($(`input[name="${id}"]:checked`).length == $(`input[name="${id}"]`).length){
+                $(`div[id="${id}"`).find(".all").addClass("active")
+                $(`div[id="${id}"`).find(".none").removeClass("active")
+            } else if ($(`input[name="${id}"]:checked`).length == 0){
+                $(`div[id="${id}"`).find(".all").removeClass("active")
+                $(`div[id="${id}"`).find(".none").addClass("active")            
+            } else {
+                $(`div[id="${id}"`).find(".all").removeClass("active")
+                $(`div[id="${id}"`).find(".none").removeClass("active")
+            }
+        })
+        // Clean up the customization modal on smaller screens.
+        if ($(window).width() < 400){
+            $(".filterLabel").each(function(){
+                $(this).after("<br>")
+            })
+        }
     }
     // Activate clue set button manually, as there is a handler below to display a warning on change.
     $("#clueSet").find(`input[value="${settings["clueSet"]}"]`).click()
@@ -260,56 +272,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
     $("#customizeSave").off().click(function(){
         // Create object out of customization form results.
         var formData = $("form").serializeArray()
-        // Find which form entries will be used to filter clues, categories, metadata, and settings.
-        var categoryAssignedFilter = formData.filter(function(row){
-            return Object.keys(labels["category"]).includes(row["name"])
-        })
-        var roundValueFilter = formData.filter(function(row){
-            return Object.keys(labels["round"]).includes(row["name"])
-        })
-        var showTypeFilter = formData.filter(function(row){
-            return Object.keys(labels["showType"]).includes(row["name"])
-        })
-        // Filter categories by matching subcategory.
-        var categoryDataFiltered = categoryData.filter(function(category){
-            for (let i = 0; i < categoryAssignedFilter.length; i++){
-                let row = categoryAssignedFilter[i]
-                if (category["subcategoryAssigned"] === row["value"]){
-                    return true
-                }
-            }
-            return false
-        })
-        // Filter clues by matching new value (will also address round filtering).
-        var clueDataFiltered1 = clueData.filter(function(clue){
-            for (let i = 0; i < roundValueFilter.length; i++){
-                let row = roundValueFilter[i]
-                if (clue["newClueValue"] === (roundConversion[row["name"]]+valueConversion[row["value"]]).toString()){
-                    return true
-                }
-            }
-            return false
-        })
-        // Filter metadata by matching show type.
-        var metadataDataFiltered = metadataData.filter(function(show){
-            for (let i = 0; i < showTypeFilter.length; i++){
-                let row = showTypeFilter[i]
-                if (show["showSubType"] === row["value"]){
-                    return true
-                }
-            }
-            return false
-        })
-        // Find which clues satisfy the category and show filters. Converting to a set
-        // turned out much faster than using the includes() method.
-        var showIDs = new Set(metadataDataFiltered.map(row => row["showID"]))
-        var clueDataFiltered2 = clueDataFiltered1.filter(function(clue){
-            return showIDs.has(clue["showID"]) 
-        })
-        var categoryIDs = new Set(categoryDataFiltered.map(row => row["categoryID"]))
-        var clueDataFilteredFinal = clueDataFiltered2.filter(function(clue){
-            return categoryIDs.has(clue["categoryID"])
-        })
+        clueDataFilteredFinal = filterClues(clueData,categoryData,metadataData,formData) 
         // Prevent buildClues from being called if the filter returns no results.
         if (clueDataFilteredFinal.length == 0){
             $("#customizeModalLabel").text(`Customization Settings: 0 clues selected`)
@@ -343,6 +306,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
     // On reset, only customization settings need to be changed if clue set is 1.
     // If it isn't, clue set 1 needs to be reloaded and thus initApp needs to be called.
     $("#customizeReset").off().click(function(){
+        initFilters = true
         if (settings["clueSet"] != "1"){    
             initApp(defaultSettings)
         } else {
@@ -351,5 +315,58 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
     })
 }
 
+function filterClues(clueData,categoryData,metadataData,formData){
+    // Find which form entries will be used to filter clues, categories, metadata, and settings.
+    var categoryAssignedFilter = formData.filter(function(row){
+        return Object.keys(labels["category"]).includes(row["name"])
+    })
+    var roundValueFilter = formData.filter(function(row){
+        return Object.keys(labels["round"]).includes(row["name"])
+    })
+    var showTypeFilter = formData.filter(function(row){
+        return Object.keys(labels["showType"]).includes(row["name"])
+    })
+    // Filter categories by matching subcategory.
+    var categoryDataFiltered = categoryData.filter(function(category){
+        for (let i = 0; i < categoryAssignedFilter.length; i++){
+            let row = categoryAssignedFilter[i]
+            if (category["subcategoryAssigned"] === row["value"]){
+                return true
+            }
+        }
+        return false
+    })
+    // Filter clues by matching new value (will also address round filtering).
+    var clueDataFiltered1 = clueData.filter(function(clue){
+        for (let i = 0; i < roundValueFilter.length; i++){
+            let row = roundValueFilter[i]
+            if (clue["newClueValue"] === (roundConversion[row["name"]]+valueConversion[row["value"]]).toString()){
+                return true
+            }
+        }
+        return false
+    })
+    // Filter metadata by matching show type.
+    var metadataDataFiltered = metadataData.filter(function(show){
+        for (let i = 0; i < showTypeFilter.length; i++){
+            let row = showTypeFilter[i]
+            if (show["showSubType"] === row["value"]){
+                return true
+            }
+        }
+        return false
+    })
+    // Find which clues satisfy the category and show filters. Converting to a set
+    // turned out much faster than using the includes() method.
+    var showIDs = new Set(metadataDataFiltered.map(row => row["showID"]))
+    var clueDataFiltered2 = clueDataFiltered1.filter(function(clue){
+        return showIDs.has(clue["showID"]) 
+    })
+    var categoryIDs = new Set(categoryDataFiltered.map(row => row["categoryID"]))
+    var clueDataFilteredFinal = clueDataFiltered2.filter(function(clue){
+        return categoryIDs.has(clue["categoryID"])
+    })
+    return clueDataFilteredFinal
+}
 // Initialize everything with clue set 1 on page load.
 initApp(defaultSettings);
