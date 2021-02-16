@@ -245,7 +245,7 @@ function buildCustomization(clueData,categoryData,metadataData,settings){
             }
         })
         // Clean up the customization modal on smaller screens.
-        if ($(window).width() < 400){
+        if ($(window).width() <= 500){
             $(".filterLabel").each(function(){
                 $(this).after("<br>")
             })
