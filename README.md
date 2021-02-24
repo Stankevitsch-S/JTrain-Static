@@ -1,7 +1,9 @@
 # JTrain-Static
 
 JTrain (stylized J! Train) is a web application for training trivia skills based on the Jeopardy! archives.
+
 This is a static version of JTrain, such that it can be downloaded and run locally, but all data is downloaded in-browser.
+
 A dynamic version using AWS to store data and serve clues is available at https://github.com/Stankevitsch-S/JTrain.
 
 ## How to use
