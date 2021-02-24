@@ -1,6 +1,8 @@
-# JTrain
+# JTrain-Static
 
 JTrain (stylized J! Train) is a web application for training trivia skills based on the Jeopardy! archives.
+This is a static version of JTrain, such that it can be downloaded and run locally, but all data is downloaded in-browser.
+A dynamic version using AWS to store data and serve clues is available at https://github.com/Stankevitsch-S/JTrain.
 
 ## How to use
 
@@ -47,14 +49,6 @@ To create categories/subcategories, clustering was performed using sklearn KMean
 To find near-miss answers, a gensim Doc2Vec model was trained on documents containing a clue, its Jeopardy! category, and its answer. After training, the model looked to find the most similar documents to a vector built from the document itself, and a vector built from just the answer. From the similar document, the answer was used as a near-miss as long as it is not contained within the clue text, answer, or other near misses (this will break when a clue consisted of multiple-choice options for contestants to choosefrom, however this only occurs in less than 0.1% of clues). 
 
 Finally, some data modelling was performed to reduce overall file sizes, resulting in the files seen in the Data folder.
-
-## To do
-
-1. Create a clue queue to allow users to backtrack on clues.
-
-2. Track progress by category/value to numerically show areas of improvement.
-
-3. Build visualizations for users based on the data gathered above.
 
 ## Credits
 
