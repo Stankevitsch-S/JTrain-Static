@@ -8,7 +8,7 @@ A dynamic version using AWS to store data and serve clues is available at https:
 
 ## How to use
 
-This application is hosted on: https://stankevitsch-s.github.io/JTrain/
+This application is hosted on: https://stankevitsch-s.github.io/JTrain-Static/
 
 On launch, a Jeopardy! clue from any category will be delivered. Near-miss answers can be seen by clicking "Show Hints", potentially helpful metadata such as Jeopardy! round, value, and show airdate can be seen by clicking "More Info", and the answer can be seen by clicking "Show Answer". Revealing the answer will also allow for a new clue to be loaded.<br>
 
